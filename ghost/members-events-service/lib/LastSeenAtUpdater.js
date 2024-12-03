@@ -52,14 +52,15 @@ class LastSeenAtUpdater {
             }
         });
 
-        domainEvents.subscribe(MemberLinkClickEvent, async (event) => {
-            try {
-                await this.cachedUpdateLastSeenAt(event.data.memberId, event.data.memberLastSeenAt, event.timestamp);
-            } catch (err) {
-                logging.error(`Error in LastSeenAtUpdater.MemberLinkClickEvent listener for member ${event.data.memberId}`);
-                logging.error(err);
-            }
-        });
+        // domainEvents.subscribe(MemberLinkClickEvent, async (event) => {
+        //     try {
+        //         // await this.cachedUpdateLastSeenAt(event.data.memberId, event.data.memberLastSeenAt, event.timestamp);
+        //         console.log(`>> Event - MemberLinkClickEvent`, event.data.memberId);
+        //     } catch (err) {
+        //         logging.error(`Error in LastSeenAtUpdater.MemberLinkClickEvent listener for member ${event.data.memberId}`);
+        //         logging.error(err);
+        //     }
+        // });
 
         domainEvents.subscribe(MemberCommentEvent, async (event) => {
             try {
@@ -123,7 +124,7 @@ class LastSeenAtUpdater {
      * @param {Date} timestamp The event timestamp
      */
     async updateLastSeenAt(memberId, memberLastSeenAt, timestamp) {
-        const timezone = this._settingsCacheService.get('timezone');
+        const timezone = this._settingsCacheService.get('timezone') || 'Etc/UTC';
         // First, check if memberLastSeenAt is null or before the beginning of the current day in the publication timezone
         // This isn't strictly necessary since we will fetch the member row for update and double check this
         // This is an optimization to avoid unnecessary database queries if last_seen_at is already after the beginning of the current day

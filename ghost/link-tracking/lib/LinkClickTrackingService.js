@@ -82,7 +82,7 @@ class LinkClickTrackingService {
         if (this.#initialised) {
             return;
         }
-        this.subscribe();
+        // this.subscribe();
         this.#initialised = true;
     }
 
@@ -218,19 +218,25 @@ class LinkClickTrackingService {
         return url;
     }
 
-    subscribe() {
-        this.#DomainEvents.subscribe(RedirectEvent, async (event) => {
-            const uuid = event.data.url.searchParams.get('m');
-            if (!uuid) {
-                return;
-            }
+    // note: this is what the service is interested in; we need to hoist this to the wrapper so that it can be used by core
+    // subscribe() {
+    //     this.#DomainEvents.subscribe(RedirectEvent, async (event) => {
+    //         const uuid = event.data.url.searchParams.get('m');
+    //         if (!uuid) {
+    //             return;
+    //         }
 
-            const click = new LinkClick({
-                member_uuid: uuid,
-                link_id: event.data.link.link_id
-            });
-            await this.#linkClickRepository.save(click);
+    //         await this.createMemberLinkClickEvent(uuid, event.data.link.link_id);
+    //     });
+    // }
+
+    async createMemberLinkClickEvent(memberUuid, linkId) {
+        console.log(`createMemberLinkClickEvent: ${memberUuid} ${linkId}`);
+        const click = new LinkClick({
+            member_uuid: memberUuid,
+            link_id: linkId
         });
+        await this.#linkClickRepository.save(click);
     }
 }
 

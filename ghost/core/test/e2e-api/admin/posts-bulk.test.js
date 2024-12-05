@@ -9,7 +9,6 @@ describe('Posts Bulk API', function () {
     let agent;
 
     before(async function () {
-        mockManager.mockLabsEnabled('collections');
         mockManager.mockLabsEnabled('collectionsCard');
 
         agent = await agentProvider.getAdminAPIAgent();
@@ -43,10 +42,6 @@ describe('Posts Bulk API', function () {
 
             assert(amount > 0, 'Expect at least one post to be affected for this test to work');
 
-            let featuredCollection = await models.Collection.findPage({filter: 'slug:featured', limit: 1, withRelated: ['collectionPosts']});
-            let featuredCollectionPostsAmount = featuredCollection.data[0].toJSON().collectionPosts.length;
-            assert(featuredCollectionPostsAmount > 0, 'Expect to have multiple featured collection posts');
-
             const response = await agent
                 .put('/posts/bulk/?filter=' + encodeURIComponent(filter))
                 .body({
@@ -72,10 +67,6 @@ describe('Posts Bulk API', function () {
             const posts = await models.Post.findAll({filter, status: 'all'});
             assert.equal(posts.length, amount, `Expect all matching posts (${amount}) to be changed`);
 
-            featuredCollection = await models.Collection.findPage({filter: 'slug:featured', limit: 1, withRelated: ['collectionPosts']});
-            featuredCollectionPostsAmount = featuredCollection.data[0].toJSON().collectionPosts.length;
-            assert.equal(featuredCollectionPostsAmount, amount, 'Expect to have same amount featured collection posts as changed');
-
             for (const post of posts) {
                 assert(post.get('featured') === true, `Expect post ${post.id} to be featured`);
             }
@@ -89,10 +80,6 @@ describe('Posts Bulk API', function () {
             const amount = changedPosts.meta.pagination.total;
 
             assert(amount > 0, 'Expect at least one post to be affected for this test to work');
-
-            let featuredCollection = await models.Collection.findPage({filter: 'slug:featured', limit: 1, withRelated: ['collectionPosts']});
-            let featuredCollectionPostsAmount = featuredCollection.data[0].toJSON().collectionPosts.length;
-            assert(featuredCollectionPostsAmount > 0, 'Expect to have multiple featured collection posts');
 
             const response = await agent
                 .put('/posts/bulk/?filter=' + encodeURIComponent(filter))
@@ -111,10 +98,6 @@ describe('Posts Bulk API', function () {
             // Fetch all posts and check if they are featured
             const posts = await models.Post.findAll({filter, status: 'all'});
             assert.equal(posts.length, amount, `Expect all matching posts (${amount}) to be changed`);
-
-            featuredCollection = await models.Collection.findPage({filter: 'slug:featured', limit: 1, withRelated: ['collectionPosts']});
-            featuredCollectionPostsAmount = featuredCollection.data[0].toJSON().collectionPosts.length;
-            assert.equal(featuredCollectionPostsAmount, 0, 'Expect to have no featured collection posts');
 
             for (const post of posts) {
                 assert(post.get('featured') === false, `Expect post ${post.id} to be unfeatured`);

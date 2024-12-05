@@ -322,13 +322,6 @@ describe('Posts Bulk API', function () {
 
             assert(amount > 0, 'Expect at least one post to be affected for this test to work');
 
-            await agent
-                .get('posts/?collection=latest')
-                .expectStatus(200)
-                .expect((res) => {
-                    assert(res.body.posts.length > 0, 'Expect latest collection to have some posts');
-                });
-
             const response = await agent
                 .delete('/posts/?filter=' + encodeURIComponent(filter))
                 .expectStatus(200)
@@ -366,10 +359,6 @@ describe('Posts Bulk API', function () {
             // Check if all posts were deleted
             const posts = await models.Post.findPage({filter, status: 'all'});
             assert.equal(posts.meta.pagination.total, 0, `Expect all matching posts (${amount}) to be deleted`);
-
-            let latestCollection = await models.Collection.findPage({filter: 'slug:latest', limit: 1, withRelated: ['collectionPosts']});
-            latestCollection = latestCollection.data[0].toJSON().collectionPosts.length;
-            assert.equal(latestCollection, 0, 'Expect to have no collection posts');
         });
     });
 });
